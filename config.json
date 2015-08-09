@@ -1,6 +1,6 @@
 {
   "locals": {
-    "url": "http://localhost:8080",
+    "url": "http://nicholasboll.github.io/blog",
     "name": "Nicholas Boll",
     "owner": "Nicholas Boll",
     "description": "Experimentations of a Web Developer"
@@ -9,6 +9,7 @@
     "./plugins/paginator.coffee",
     "wintersmith-tag"
   ],
+  "baseUrl": "/",
   "require": {
     "moment": "moment",
     "_": "underscore",
