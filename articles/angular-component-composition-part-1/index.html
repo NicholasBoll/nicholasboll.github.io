@@ -17,7 +17,6 @@
         <p class="author">Written by <span class="author"><a href="mailto:nicholas.boll@gmail.com">Nicholas Boll</a></span>
         </p>
         <p class="date"><span>August 08 2015</span></p>
-        <h3>Tags</h3><span class="sub"><a href="/tag/angular/1/" class="big-tag">angular</a><a href="/tag/javascript/1/" class="big-tag">javascript</a><a href="/tag/component/1/" class="big-tag">component</a><a href="/tag/composition/1/" class="big-tag">composition</a></span>
       </div>
     </header>
     <div id="content">
@@ -187,11 +186,28 @@ app.controller(<span class="string">'TooltipController'</span>, TooltipControlle
 <p>The whole idea of composition is to have a small base component with decorators that modify the behavior. These decorators should be small and only do one thing. This is a difficult balance, but keeps additional features to be additional decorators rather than modification of the root component. The alternative is a very large component with a growing number of config flags. We use this composition model to separate our component <span class="caps">UI</span> from our application (different code repositories). Usually application component decorators interact with the component API to give the component data. This way we can completely test all expected behaviors of components void of any application&nbsp;dependencies.</p>
 </section>
         </article>
+        <h3>Tags</h3><span class="sub"><a href="/tag/angular/1/" class="big-tag">angular</a><a href="/tag/javascript/1/" class="big-tag">javascript</a><a href="/tag/component/1/" class="big-tag">component</a><a href="/tag/composition/1/" class="big-tag">composition</a></span>
       </div>
     </div>
     <footer>
       <div class="content-wrap">
         <div class="nav"><a href="/">« Full blog</a></div>
+                <div id="disqus_thread"></div>
+                <script>
+                  var disqus_shortname = 'nicholasboll';
+                  
+                  /* * * DON'T EDIT BELOW THIS LINE * * */
+                  (function() {
+                      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+                      dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+                      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+                  })();
+                  
+                </script>
+                <noscript>
+                  Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+                  <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+                </noscript>
         <section class="about">
         </section>
         <section class="copy">
