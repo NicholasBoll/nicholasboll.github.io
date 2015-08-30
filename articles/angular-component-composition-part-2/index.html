@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width">
+    <title>Angular Component Composition - Part 2 - Dropdown Component - Nicholas Boll
+    </title>
+    <link rel="alternate" href="http://nicholasboll.github.io/blog/feed.xml" type="application/rss+xml" title="Experimentations of a Web Developer">
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic|Anonymous+Pro:400,700,400italic,700italic|Merriweather:400,700,300">
+    <link rel="stylesheet" href="/css/main.css">
+  </head>
+  <body class="article-detail">
+    <header class="header">
+      <div class="content-wrap">
+        <h1>Angular Component Composition - Part 2 - Dropdown Component</h1>
+        <p class="author">Written by <span class="author"><a href="mailto:nicholas.boll@gmail.com">Nicholas Boll</a></span>
+        </p>
+        <p class="date"><span>August 30 2015</span></p>
+      </div>
+    </header>
+    <div id="content">
+      <div class="content-wrap">
+        <article class="article">
+          <section class="content"><h2 id="building-the-dropdown-component">Building the dropdown&nbsp;component</h2>
+<p>This article builds on <a href="/articles/angular-component-composition-part-1/">Part 1 - Introduction</a> of the series. Please take some time to read that article first (should only take a few&nbsp;minutes).</p>
+<p>The introduction built a very simple component to showcase the idea of component composition. Now we will go in-depth starting with a dropdown component. There are many examples of dropdowns available, but this is going to be a minimalistic component that will be very easy to&nbsp;extend.</p>
+<h2 id="composition">Composition</h2>
+<p>I like the Angular Bootstrap project because components there are very composable, but also very difficult to read. Here is an example from <a href="https://angular-ui.github.io/bootstrap/#/dropdown"><span class="caps">UI</span> Bootstrap</a>.</p>
+<pre><code class="lang-html"><span class="tag">&lt;<span class="title">div</span> <span class="attribute">class</span>=<span class="value">"btn-group"</span> <span class="attribute">dropdown</span> <span class="attribute">is-open</span>=<span class="value">"status.isopen"</span>&gt;</span>
+  <span class="tag">&lt;<span class="title">button</span> <span class="attribute">id</span>=<span class="value">"single-button"</span> <span class="attribute">type</span>=<span class="value">"button"</span> <span class="attribute">class</span>=<span class="value">"btn btn-primary"</span> <span class="attribute">dropdown-toggle</span> <span class="attribute">ng-disabled</span>=<span class="value">"disabled"</span>&gt;</span>
+    Button dropdown <span class="tag">&lt;<span class="title">span</span> <span class="attribute">class</span>=<span class="value">"caret"</span>&gt;</span><span class="tag">&lt;/<span class="title">span</span>&gt;</span>
+  <span class="tag">&lt;/<span class="title">button</span>&gt;</span>
+  <span class="tag">&lt;<span class="title">ul</span> <span class="attribute">class</span>=<span class="value">"dropdown-menu"</span> <span class="attribute">role</span>=<span class="value">"menu"</span> <span class="attribute">aria-labelledby</span>=<span class="value">"single-button"</span>&gt;</span>
+    <span class="tag">&lt;<span class="title">li</span> <span class="attribute">role</span>=<span class="value">"menuitem"</span>&gt;</span><span class="tag">&lt;<span class="title">a</span> <span class="attribute">href</span>=<span class="value">"#"</span>&gt;</span>Action<span class="tag">&lt;/<span class="title">a</span>&gt;</span><span class="tag">&lt;/<span class="title">li</span>&gt;</span>
+    <span class="tag">&lt;<span class="title">li</span> <span class="attribute">role</span>=<span class="value">"menuitem"</span>&gt;</span><span class="tag">&lt;<span class="title">a</span> <span class="attribute">href</span>=<span class="value">"#"</span>&gt;</span>Another action<span class="tag">&lt;/<span class="title">a</span>&gt;</span><span class="tag">&lt;/<span class="title">li</span>&gt;</span>
+    <span class="tag">&lt;<span class="title">li</span> <span class="attribute">role</span>=<span class="value">"menuitem"</span>&gt;</span><span class="tag">&lt;<span class="title">a</span> <span class="attribute">href</span>=<span class="value">"#"</span>&gt;</span>Something else here<span class="tag">&lt;/<span class="title">a</span>&gt;</span><span class="tag">&lt;/<span class="title">li</span>&gt;</span>
+    <span class="tag">&lt;<span class="title">li</span> <span class="attribute">class</span>=<span class="value">"divider"</span>&gt;</span><span class="tag">&lt;/<span class="title">li</span>&gt;</span>
+    <span class="tag">&lt;<span class="title">li</span> <span class="attribute">role</span>=<span class="value">"menuitem"</span>&gt;</span><span class="tag">&lt;<span class="title">a</span> <span class="attribute">href</span>=<span class="value">"#"</span>&gt;</span>Separated link<span class="tag">&lt;/<span class="title">a</span>&gt;</span><span class="tag">&lt;/<span class="title">li</span>&gt;</span>
+  <span class="tag">&lt;/<span class="title">ul</span>&gt;</span>
+<span class="tag">&lt;/<span class="title">div</span>&gt;</span>
+</code></pre>
+<p>You can tell that block of <span class="caps">HTML</span> is a dropdown by looking at the template, right? Components should be an abstraction that is easy to think about in terms of real objects on the screen. Also why should the application developer have to be concerned with all the aria stuff? Lets start to build a dropdown from scratch, but this is the API we’re going&nbsp;for:</p>
+<pre><code class="lang-html"><span class="tag">&lt;<span class="title">ui-dropdown</span>
+  <span class="attribute">ui-dropdown-options</span>=<span class="value">"['a','b','c','d']"</span>
+  <span class="attribute">placeholder</span>=<span class="value">"Please Select"</span>
+  <span class="attribute">ng-model</span>=<span class="value">"selected"</span>
+&gt;</span><span class="tag">&lt;/<span class="title">ui-dropdown</span>&gt;</span>
+</code></pre>
+<p>I’m going to use <span class="caps">ES6</span> from now on. Here is the model for the&nbsp;dropdown:</p>
+<h2 id="model">Model</h2>
+<pre><code class="lang-js"><span class="keyword">var</span> DropdownModel = Scheming.create({
+  display: {
+    type: <span class="built_in">String</span>,
+    <span class="keyword">default</span>: <span class="literal">null</span>
+  },
+  placeholder: {
+    type: <span class="built_in">String</span>,
+    <span class="keyword">default</span>: <span class="string">'Please Select'</span>
+  },
+  intent: {
+    type: <span class="string">'*'</span>,
+    <span class="keyword">default</span>: <span class="literal">null</span>
+  },
+  options: {
+    type: [<span class="string">'*'</span>],
+    <span class="keyword">default</span>: []
+  },
+  isOpened: {
+    type: <span class="built_in">Boolean</span>,
+    <span class="keyword">default</span>: <span class="literal">false</span>
+  },
+  isFocused: {
+    type: <span class="built_in">Boolean</span>,
+    <span class="keyword">default</span>: <span class="literal">false</span>
+  }
+});
+</code></pre>
+<p>The model determines the state of the component - and only this state. The model is meant to be reactive - the component’s link and template react to model changes. We’re using <a href="https://github.com/autoric/scheming">Scheming</a> to give us a reactive model outside of Angular’s <code>$scope</code>.</p>
+<p><strong>Note:</strong>
+This is actually a very important part of component composition - models are where state is held and we can observe these state changes outside of Angular’s <code>$scope</code> hierarchy. Without this observable model, component decorators would not work because the decorator’s scope isn’t actually the component’s&nbsp;scope.</p>
+<h2 id="controller">Controller</h2>
+<pre><code class="lang-js"><span class="class"><span class="keyword">class</span> <span class="title">DropdownController</span> </span>{
+  constructor (uiDropdownModel) {
+    <span class="keyword">if</span> (!<span class="keyword">this</span>.model) {
+      <span class="keyword">this</span>.model = <span class="keyword">new</span> uiDropdownModel();
+    }
+  }
+
+  setOptions (options = []) {
+    <span class="keyword">this</span>.model.options = options;
+  }
+
+  selectItem (item) {
+    <span class="keyword">this</span>.model.display = item;
+    <span class="keyword">this</span>.model.isOpened = <span class="literal">false</span>;
+  }
+
+  isIntent (item) {
+    <span class="keyword">return</span> item === <span class="keyword">this</span>.model.intent;
+  }
+
+  setIntent (item) {
+    <span class="keyword">this</span>.model.intent = item;
+  }
+
+  focus () {
+    <span class="keyword">this</span>.model.isFocused = <span class="literal">true</span>;
+    <span class="keyword">this</span>.model.isOpened = <span class="literal">true</span>;
+  }
+
+  blur () {
+    <span class="keyword">this</span>.model.isFocused = <span class="literal">false</span>;
+    <span class="keyword">this</span>.model.isOpened = <span class="literal">false</span>;
+  }
+}
+</code></pre>
+<p>The controller is meant to house methods that interact with the model - the view should not directly interact with it. This separation allows the controller to be easily unit tested. The controller’s constructor has tests for a model to be predefined and will create a new on if not defined. I have done this to allow the component to be part of an owning component to pass down an instantiated model. This can be very useful for components like tabsets where something else wants to change tabs - after all, the model is just state and the view just renders that state. I haven’t found a good use-case to make dropdown models owned by a container, but to be consistent, all components have this feature. The rest of the controller will make more sense with the&nbsp;directive.</p>
+<h2 id="dropdown-component">Dropdown&nbsp;Component</h2>
+<pre><code class="lang-js"><span class="function"><span class="keyword">function</span> <span class="title">DropdownComponent</span> <span class="params">()</span> </span>{
+  <span class="keyword">return</span> {
+    restrict: <span class="string">'E'</span>,
+
+    scope: {
+      model: <span class="string">'=uiDropdownModel'</span>
+    },
+
+    controller: <span class="string">'uiDropdownController'</span>,
+    controllerAs: <span class="string">'dropdown'</span>,
+    bindToController: <span class="literal">true</span>,
+
+    <span class="built_in">require</span>: [<span class="string">'uiDropdown'</span>, <span class="string">'?ngModel'</span>],
+
+    template: <span class="string">`
+      &lt;button
+        ui-dropdown-button
+        type="button"
+        class="ui button selected"
+        ng-disabled="dropdown.model.isDisabled"
+        ng-class="{focus: dropdown.model.isFocused}"
+      &gt;
+        {{ dropdown.model.display || dropdown.model.placeholder }}
+      &lt;/button&gt;
+      &lt;div class="options-container" ng-if="dropdown.model.isOpened"&gt;
+        &lt;ul class="options" role="menu"&gt;
+          &lt;li
+            class="option"
+            role="menuitem"
+            ng-repeat="item in dropdown.model.options"
+            ng-mouseover="dropdown.setIntent(item)"
+            ng-class="{intent: dropdown.isIntent(item)}"
+            ng-click="dropdown.selectItem(item)"
+          &gt;
+            {{item}}
+          &lt;/li&gt;
+        &lt;/ul&gt;
+      &lt;/div&gt;
+    `</span>,
+
+    link: {
+
+      pre: <span class="function"><span class="keyword">function</span> <span class="params">($scope, $element, $attrs, [dropdown, ngModel])</span> </span>{
+
+        <span class="comment">// ngModel - only two-way data-binding allowed</span>
+        <span class="keyword">if</span> (ngModel) {
+          ngModel.$render = <span class="function"><span class="keyword">function</span> <span class="params">()</span> </span>{
+            dropdown.selectItem(ngModel.$viewValue);
+          };
+
+          $scope.schemingWatch(dropdown.model, <span class="string">'display'</span>, <span class="function"><span class="keyword">function</span> <span class="params">(value, oldValue)</span> </span>{
+            <span class="keyword">if</span> (value !== oldValue) {
+              <span class="comment">// tell ngModel about a change only if there is one</span>
+              ngModel.$setViewValue(value);
+            }
+          });
+
+          <span class="comment">// observed view properties</span>
+          $scope.schemingWatch(dropdown.model, [<span class="string">'isOpened'</span>, <span class="string">'isFocused'</span>, <span class="string">'options'</span>], <span class="function"><span class="keyword">function</span> <span class="params">()</span> </span>{
+            $scope.$digest();
+          });
+
+        }
+      },
+
+      post: <span class="function"><span class="keyword">function</span> <span class="params">($scope, $element, $attrs, [dropdown, ngModel])</span> </span>{
+        $element.on(<span class="string">'mousedown'</span>, (event) =&gt; {
+          <span class="comment">// prevent unintended focus changes</span>
+          event.preventDefault();
+        });
+      }
+    }
+  };
+}
+</code></pre>
+<p>Like the tooltip component in the introduction, the link function is large here as well. The component uses a factory function that returns a Directive Definition Object. I will use this pattern until something like <a href="https://github.com/angular/angular.js/issues/10007">angular.component</a> is released. I’ll note some choices&nbsp;here:</p>
+<h3 id="restrict">Restrict</h3>
+<pre><code class="lang-js">restrict: <span class="string">'E'</span>
+</code></pre>
+<p>All components should be element selectors - it is easier to recognize them at a glance and it is obvious who owns the isolate&nbsp;scope.</p>
+<h3 id="scope">Scope</h3>
+<pre><code class="lang-js">scope: { model: <span class="string">'=uiDropdownModel'</span> }
+</code></pre>
+<p>All components should have an isolate scope. While this is technically a 2-way reference binding, the reference should never be changed by either side. Items here should be intended as 1-way data bound properties (like props in <a href="http://facebook.github.io/react/">ReactJS</a>). I tend to prefix all properties with <code>ui-{component_name}-</code> to make an obvious association with the component. It is temping to create config properties here - I suggest avoiding the urge as it defeats the purpose of small, composable components. More on this&nbsp;later.</p>
+<h3 id="controller">Controller</h3>
+<pre><code class="lang-js">controller: <span class="string">'uiDropdownController'</span>,
+controllerAs: <span class="string">'dropdown'</span>
+</code></pre>
+<p>All composable components should have a controller and that scope name should be a short name of the component. The controller is referenced by a string for unit testing. It is possible to grab a controller registered with a <span class="caps">DDO</span>, but it is silly and&nbsp;difficult.</p>
+<h3 id="bindtocontroller">BindToController</h3>
+<pre><code class="lang-js">bindToController: <span class="string">'true'</span>
+</code></pre>
+<p>This sets the scope to bind directly to the controller instead of <code>$scope</code>. We are trying to avoid <code>$scope</code> as much as possible - keeping as much <span class="caps">DOM</span> logic in the link function as possible. In this component, defining <code>ui-dropdown-model=&quot;someDropdownModel&quot;</code> will actually set the <code>model</code> property directly on the controller instance and will be defined by the time the constructor is called.&nbsp;Handy.</p>
+<h3 id="require">Require</h3>
+<pre><code class="lang-js"><span class="built_in">require</span>: [<span class="string">'uiDropdown'</span>, <span class="string">'?ngModel'</span>]
+</code></pre>
+<p>The optional <code>ngModel</code> requirement will inject the instance of the <code>ng-model</code> controller into the linking function. This allows the dropdown component to act like other form elements with value binding, validation,&nbsp;etc.</p>
+<h3 id="template">Template</h3>
+<p>The template is inlined for <a href="http://plnkr.co/FIKuIpn9xl2FRliqV05R">performance</a>. You can use <a href="https://webpack.github.io/">Webpack</a> or <a href="http://browserify.org/">Browserify</a> to do this&nbsp;instead:</p>
+<pre><code class="lang-js"><span class="built_in">require</span>(<span class="string">'./template.html'</span>);
+
+<span class="comment">// ...</span>
+<span class="keyword">return</span> {
+  template: template
+};
+</code></pre>
+<p>The template contains a <code>ui-dropdown-button</code> helper directive to attach events to effect the state of the component. Composition can be&nbsp;parent/child.</p>
+<h3 id="link">Link</h3>
+<p>The link function is broken into a <code>pre</code> and <code>post</code> link. It is currently considered bad practice to ever use <code>compile</code> or <code>preLink</code>, but <code>pre</code> and <code>post</code> link have an important distinction between when they get called in the lifecycle of compiling child components. <code>preLink</code> on a parent gets called <em>before</em> the <code>preLink</code> of a child. <code>postLink</code> on a parent gets called <em>after</em> the <code>postLink</code> of a child. You can find more information about the lifecycle of directives <a href="http://www.jvandemo.com/the-nitty-gritty-of-compile-and-link-functions-inside-angularjs-directives/">here</a>.</p>
+<p>The <code>preLink</code> function sets up model/$scope listeners. The <code>preLink</code> also composes components - this is a little strange that controllers don’t get this information (yet), but it is how we have to do it for now. The <code>preLink</code> fires right after the <code>controller</code> instantiates - which guarantees the component’s controller is in the correct state for any child components. The dropdown also sets up <code>ngModel</code> hookups if&nbsp;present.</p>
+<p>The <code>postLink</code> sets up <span class="caps">DOM</span> event listeners. This has to be done in <code>postLink</code> because in the case of transclusion, the <code>$element</code> variable will be the final <span class="caps">DOM</span> in <code>postLink</code>, but will be a cached clone in <code>preLink</code>.</p>
+<h2 id="dropdown-options-decorator">Dropdown Options&nbsp;Decorator</h2>
+<pre><code class="lang-js"><span class="function"><span class="keyword">function</span> <span class="title">DropdownOptionsDecorator</span> <span class="params">()</span> </span>{
+  <span class="keyword">return</span> {
+    restrict: <span class="string">'A'</span>,
+    <span class="built_in">require</span>: <span class="string">'uiDropdown'</span>,
+
+    link: {
+      pre: <span class="function"><span class="keyword">function</span> <span class="params">($scope, $element, $attrs, dropdown)</span> </span>{
+        $scope.$watchCollection($attrs.uiDropdownOptions, <span class="function"><span class="keyword">function</span> <span class="params">(options)</span> </span>{
+          <span class="keyword">if</span> (options) {
+            dropdown.setOptions(options);
+          }
+        });
+      }
+    }
+  }
+}
+</code></pre>
+<p>This decorator dog-foods our <span class="caps">API</span> to provide a very simple case for static options passed in from a parent source (ex: page&nbsp;controller).</p>
+<p>Wait, why isn’t <code>options</code> just passed into the dropdown component through the isolate scope definition? Well, we are trying to keep the dropdown component as light and composable as possible, without making any assumptions about how an application might use the component. Having options directly passed through and attribute makes an assumption that options are static and moves the responsibility of providing options to some view controller. This may seem reasonable, but what if we don’t know the options ahead of time? What if getting options isn’t the responsibility of a parent view controller? We ran into major issues with this type of assumption on a page with many dropdowns that all requested dynamic data as the user interacted with them. And dropdowns were used on more than one page, which meant binding logic had to be copy/pasted from one page controller to the&nbsp;next.</p>
+<h2 id="dynamic-dropdown-options-decorator">Dynamic Dropdown Options&nbsp;Decorator</h2>
+<p>This example just uses <code>$timeout</code> to fulfill an options request, but the idea is that a request is made to a backend and a response comes back. This type of decorator would actually be part of the application’s code since only your application knows how to talk to a&nbsp;backend.</p>
+<pre><code class="lang-js"><span class="function"><span class="keyword">function</span> <span class="title">DropdownDynamicOptionsDecorator</span> <span class="params">($timeout)</span> </span>{
+  <span class="keyword">return</span> {
+    restrict: <span class="string">'A'</span>,
+    <span class="built_in">require</span>: <span class="string">'uiDropdown'</span>,
+
+    link: {
+      pre: <span class="function"><span class="keyword">function</span> <span class="params">($scope, $element, $attrs, dropdown)</span> </span>{
+        $scope.schemingWatch(dropdown.model, <span class="string">'isOpened'</span>, <span class="function"><span class="keyword">function</span> <span class="params">(isOpened)</span> </span>{
+          <span class="keyword">if</span> (isOpened) {
+            $timeout(<span class="function"><span class="keyword">function</span> <span class="params">()</span> </span>{
+              dropdown.setOptions([<span class="string">'a'</span>,<span class="string">'b'</span>,<span class="string">'c'</span>].map((o) =&gt; $attrs.uiDropdownDynamicOptionsPrefix + <span class="string">' '</span> + o));
+            }, <span class="number">50</span>, <span class="literal">false</span>);
+          } <span class="keyword">else</span> {
+            dropdown.setOptions([]);
+          }
+        });
+      }
+    }
+  }
+}
+</code></pre>
+<h2 id="more-composition">More&nbsp;composition</h2>
+<p>Here is an example component in our&nbsp;application:</p>
+<pre><code class="lang-js">&lt;ui-dropdown
+  <span class="class"><span class="keyword">class</span></span>=<span class="string">"small"</span>
+  placeholder=<span class="string">"{{ AlarmsFilters.filters.byAlarmStatus.selected }}"</span>
+  ui-dropdown-keys=<span class="string">"{ display: 'display', selected: 'selected' }"</span>
+  ui-dropdown-url=<span class="string">"/html/templates/distinct-value.html"</span>
+  distinct-value-dropdown=<span class="string">"alarmStatus"</span>
+  distinct-value-index=<span class="string">"ALARM_INDEX_ID"</span>
+  distinct-value-transform=<span class="string">"AlarmOptions.FilterByAlarmStatusOptions"</span>
+  lucene-query=<span class="string">"alarmQuery"</span>
+  lucene-query-filter=<span class="string">"{ field: 'alarmStatus', type: 'Number', modelKey: 'value' }"</span>
+  ng-model=<span class="string">"AlarmsFilters.filters.byAlarmStatus"</span>
+  ng-<span class="class"><span class="keyword">class</span></span>=<span class="string">"{applied : AlarmsFilters.filters.byAlarmStatus.value !== AlarmsFilters.defaultFilters().byAlarmStatus.value}"</span>
+&gt;<span class="xml"><span class="tag">&lt;/<span class="title">ui-dropdown</span>&gt;</span></span>
+</code></pre>
+<p>This is the dropdown component with a <code>distinct-value</code> decorator that gets distinct <code>alarmStatus</code> field values from the server - the guts of this decorator are very similar to the dynamic decorator shown earlier. The <code>lucene-query</code> decorator is optionally required by the <code>distinct-value</code> decorator to modify the query made to the server. There is actually many of these dropdowns on the page - all working together to create a filtered query for a result set. My recorded talk goes over this at <a href="https://www.youtube.com/watch?v=BYVesUiUpI4&amp;feature=youtu.be&amp;t=1435">23:55</a></p>
+<h2 id="conclusion">Conclusion</h2>
+<p>Component composition is a bit difficult in Angular 1.x, but very powerful. It allows us to compose smaller pieces together to make something very useful. We have dropdowns that get options from different sources and just have different decorators to talk to backend endpoints. This allows the page controller to not have to worry about getting data to the dropdowns, but only care about the values of each dropdown. It keeps concerns at the right&nbsp;level.</p>
+</section>
+        </article>
+        <h3>Tags</h3><span class="sub"><a href="/tag/angular/1/" class="big-tag">angular</a><a href="/tag/javascript/1/" class="big-tag">javascript</a><a href="/tag/component/1/" class="big-tag">component</a><a href="/tag/composition/1/" class="big-tag">composition</a></span>
+      </div>
+    </div>
+    <footer>
+      <div class="content-wrap">
+        <div class="nav"><a href="/">« Full blog</a></div>
+                <div id="disqus_thread"></div>
+                <script>
+                  var disqus_shortname = 'nicholasboll';
+                  
+                  /* * * DON'T EDIT BELOW THIS LINE * * */
+                  (function() {
+                      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+                      dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+                      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+                  })();
+                  
+                </script>
+                <noscript>
+                  Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+                  <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+                </noscript>
+        <section class="about">
+        </section>
+        <section class="copy">
+          <p>&copy; 2015 Nicholas Boll &mdash; powered by&nbsp;<a href="https://github.com/jnordberg/wintersmith">Wintersmith</a>
+          </p>
+        </section>
+      </div>
+    </footer>
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+      
+      ga('create', 'UA-66245109-1', 'auto');
+      ga('send', 'pageview');
+    </script>
+  </body>
+</html>

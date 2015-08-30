@@ -5,9 +5,285 @@
     <atom:link href="http://nicholasboll.github.io/blog/feed.xml" rel="self" type="application/rss+xml"></atom:link>
     <link>http://nicholasboll.github.io/blog</link>
     <description>Experimentations of a Web Developer</description>
-    <pubDate>Sat, 08  Aug 2015 15:00:00 -0600</pubDate>
+    <pubDate>Sun, 30  Aug 2015 13:00:00 -0600</pubDate>
     <generator>Wintersmith - https://github.com/jnordberg/wintersmith</generator>
     <language>en</language>
+    <item>
+      <title>Angular Component Composition - Part 2 - Dropdown Component</title>
+      <link>http://nicholasboll.github.io/blog/articles/angular-component-composition-part-2/</link>
+      <pubDate>Sun, 30  Aug 2015 13:00:00 -0600</pubDate>
+      <guid isPermaLink="true">http://nicholasboll.github.io/blog/articles/angular-component-composition-part-2/</guid>
+      <author></author>
+      <description>&lt;h2 id=&quot;building-the-dropdown-component&quot;&gt;Building the dropdown component&lt;/h2&gt;
+&lt;p&gt;This article builds on &lt;a href=&quot;http://nicholasboll.github.io/blog/articles/angular-component-composition-part-1/&quot;&gt;Part 1 - Introduction&lt;/a&gt; of the series. Please take some time to read that article first (should only take a few minutes).&lt;/p&gt;
+&lt;p&gt;The introduction built a very simple component to showcase the idea of component composition. Now we will go in-depth starting with a dropdown component. There are many examples of dropdowns available, but this is going to be a minimalistic component that will be very easy to extend.&lt;/p&gt;
+&lt;h2 id=&quot;composition&quot;&gt;Composition&lt;/h2&gt;
+&lt;p&gt;I like the Angular Bootstrap project because components there are very composable, but also very difficult to read. Here is an example from &lt;a href=&quot;https://angular-ui.github.io/bootstrap/#/dropdown&quot;&gt;UI Bootstrap&lt;/a&gt;.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&quot;lang-html&quot;&gt;&lt;span class=&quot;tag&quot;&gt;&amp;lt;&lt;span class=&quot;title&quot;&gt;div&lt;/span&gt; &lt;span class=&quot;attribute&quot;&gt;class&lt;/span&gt;=&lt;span class=&quot;value&quot;&gt;&quot;btn-group&quot;&lt;/span&gt; &lt;span class=&quot;attribute&quot;&gt;dropdown&lt;/span&gt; &lt;span class=&quot;attribute&quot;&gt;is-open&lt;/span&gt;=&lt;span class=&quot;value&quot;&gt;&quot;status.isopen&quot;&lt;/span&gt;&amp;gt;&lt;/span&gt;
+  &lt;span class=&quot;tag&quot;&gt;&amp;lt;&lt;span class=&quot;title&quot;&gt;button&lt;/span&gt; &lt;span class=&quot;attribute&quot;&gt;id&lt;/span&gt;=&lt;span class=&quot;value&quot;&gt;&quot;single-button&quot;&lt;/span&gt; &lt;span class=&quot;attribute&quot;&gt;type&lt;/span&gt;=&lt;span class=&quot;value&quot;&gt;&quot;button&quot;&lt;/span&gt; &lt;span class=&quot;attribute&quot;&gt;class&lt;/span&gt;=&lt;span class=&quot;value&quot;&gt;&quot;btn btn-primary&quot;&lt;/span&gt; &lt;span class=&quot;attribute&quot;&gt;dropdown-toggle&lt;/span&gt; &lt;span class=&quot;attribute&quot;&gt;ng-disabled&lt;/span&gt;=&lt;span class=&quot;value&quot;&gt;&quot;disabled&quot;&lt;/span&gt;&amp;gt;&lt;/span&gt;
+    Button dropdown &lt;span class=&quot;tag&quot;&gt;&amp;lt;&lt;span class=&quot;title&quot;&gt;span&lt;/span&gt; &lt;span class=&quot;attribute&quot;&gt;class&lt;/span&gt;=&lt;span class=&quot;value&quot;&gt;&quot;caret&quot;&lt;/span&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;tag&quot;&gt;&amp;lt;/&lt;span class=&quot;title&quot;&gt;span&lt;/span&gt;&amp;gt;&lt;/span&gt;
+  &lt;span class=&quot;tag&quot;&gt;&amp;lt;/&lt;span class=&quot;title&quot;&gt;button&lt;/span&gt;&amp;gt;&lt;/span&gt;
+  &lt;span class=&quot;tag&quot;&gt;&amp;lt;&lt;span class=&quot;title&quot;&gt;ul&lt;/span&gt; &lt;span class=&quot;attribute&quot;&gt;class&lt;/span&gt;=&lt;span class=&quot;value&quot;&gt;&quot;dropdown-menu&quot;&lt;/span&gt; &lt;span class=&quot;attribute&quot;&gt;role&lt;/span&gt;=&lt;span class=&quot;value&quot;&gt;&quot;menu&quot;&lt;/span&gt; &lt;span class=&quot;attribute&quot;&gt;aria-labelledby&lt;/span&gt;=&lt;span class=&quot;value&quot;&gt;&quot;single-button&quot;&lt;/span&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;tag&quot;&gt;&amp;lt;&lt;span class=&quot;title&quot;&gt;li&lt;/span&gt; &lt;span class=&quot;attribute&quot;&gt;role&lt;/span&gt;=&lt;span class=&quot;value&quot;&gt;&quot;menuitem&quot;&lt;/span&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;tag&quot;&gt;&amp;lt;&lt;span class=&quot;title&quot;&gt;a&lt;/span&gt; &lt;span class=&quot;attribute&quot;&gt;href&lt;/span&gt;=&lt;span class=&quot;value&quot;&gt;&quot;#&quot;&lt;/span&gt;&amp;gt;&lt;/span&gt;Action&lt;span class=&quot;tag&quot;&gt;&amp;lt;/&lt;span class=&quot;title&quot;&gt;a&lt;/span&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;tag&quot;&gt;&amp;lt;/&lt;span class=&quot;title&quot;&gt;li&lt;/span&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;tag&quot;&gt;&amp;lt;&lt;span class=&quot;title&quot;&gt;li&lt;/span&gt; &lt;span class=&quot;attribute&quot;&gt;role&lt;/span&gt;=&lt;span class=&quot;value&quot;&gt;&quot;menuitem&quot;&lt;/span&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;tag&quot;&gt;&amp;lt;&lt;span class=&quot;title&quot;&gt;a&lt;/span&gt; &lt;span class=&quot;attribute&quot;&gt;href&lt;/span&gt;=&lt;span class=&quot;value&quot;&gt;&quot;#&quot;&lt;/span&gt;&amp;gt;&lt;/span&gt;Another action&lt;span class=&quot;tag&quot;&gt;&amp;lt;/&lt;span class=&quot;title&quot;&gt;a&lt;/span&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;tag&quot;&gt;&amp;lt;/&lt;span class=&quot;title&quot;&gt;li&lt;/span&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;tag&quot;&gt;&amp;lt;&lt;span class=&quot;title&quot;&gt;li&lt;/span&gt; &lt;span class=&quot;attribute&quot;&gt;role&lt;/span&gt;=&lt;span class=&quot;value&quot;&gt;&quot;menuitem&quot;&lt;/span&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;tag&quot;&gt;&amp;lt;&lt;span class=&quot;title&quot;&gt;a&lt;/span&gt; &lt;span class=&quot;attribute&quot;&gt;href&lt;/span&gt;=&lt;span class=&quot;value&quot;&gt;&quot;#&quot;&lt;/span&gt;&amp;gt;&lt;/span&gt;Something else here&lt;span class=&quot;tag&quot;&gt;&amp;lt;/&lt;span class=&quot;title&quot;&gt;a&lt;/span&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;tag&quot;&gt;&amp;lt;/&lt;span class=&quot;title&quot;&gt;li&lt;/span&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;tag&quot;&gt;&amp;lt;&lt;span class=&quot;title&quot;&gt;li&lt;/span&gt; &lt;span class=&quot;attribute&quot;&gt;class&lt;/span&gt;=&lt;span class=&quot;value&quot;&gt;&quot;divider&quot;&lt;/span&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;tag&quot;&gt;&amp;lt;/&lt;span class=&quot;title&quot;&gt;li&lt;/span&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;tag&quot;&gt;&amp;lt;&lt;span class=&quot;title&quot;&gt;li&lt;/span&gt; &lt;span class=&quot;attribute&quot;&gt;role&lt;/span&gt;=&lt;span class=&quot;value&quot;&gt;&quot;menuitem&quot;&lt;/span&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;tag&quot;&gt;&amp;lt;&lt;span class=&quot;title&quot;&gt;a&lt;/span&gt; &lt;span class=&quot;attribute&quot;&gt;href&lt;/span&gt;=&lt;span class=&quot;value&quot;&gt;&quot;#&quot;&lt;/span&gt;&amp;gt;&lt;/span&gt;Separated link&lt;span class=&quot;tag&quot;&gt;&amp;lt;/&lt;span class=&quot;title&quot;&gt;a&lt;/span&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;tag&quot;&gt;&amp;lt;/&lt;span class=&quot;title&quot;&gt;li&lt;/span&gt;&amp;gt;&lt;/span&gt;
+  &lt;span class=&quot;tag&quot;&gt;&amp;lt;/&lt;span class=&quot;title&quot;&gt;ul&lt;/span&gt;&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;tag&quot;&gt;&amp;lt;/&lt;span class=&quot;title&quot;&gt;div&lt;/span&gt;&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;You can tell that block of HTML is a dropdown by looking at the template, right? Components should be an abstraction that is easy to think about in terms of real objects on the screen. Also why should the application developer have to be concerned with all the aria stuff? Lets start to build a dropdown from scratch, but this is the API we’re going for:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&quot;lang-html&quot;&gt;&lt;span class=&quot;tag&quot;&gt;&amp;lt;&lt;span class=&quot;title&quot;&gt;ui-dropdown&lt;/span&gt;
+  &lt;span class=&quot;attribute&quot;&gt;ui-dropdown-options&lt;/span&gt;=&lt;span class=&quot;value&quot;&gt;&quot;['a','b','c','d']&quot;&lt;/span&gt;
+  &lt;span class=&quot;attribute&quot;&gt;placeholder&lt;/span&gt;=&lt;span class=&quot;value&quot;&gt;&quot;Please Select&quot;&lt;/span&gt;
+  &lt;span class=&quot;attribute&quot;&gt;ng-model&lt;/span&gt;=&lt;span class=&quot;value&quot;&gt;&quot;selected&quot;&lt;/span&gt;
+&amp;gt;&lt;/span&gt;&lt;span class=&quot;tag&quot;&gt;&amp;lt;/&lt;span class=&quot;title&quot;&gt;ui-dropdown&lt;/span&gt;&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;I’m going to use ES6 from now on. Here is the model for the dropdown:&lt;/p&gt;
+&lt;h2 id=&quot;model&quot;&gt;Model&lt;/h2&gt;
+&lt;pre&gt;&lt;code class=&quot;lang-js&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;var&lt;/span&gt; DropdownModel = Scheming.create({
+  display: {
+    type: &lt;span class=&quot;built_in&quot;&gt;String&lt;/span&gt;,
+    &lt;span class=&quot;keyword&quot;&gt;default&lt;/span&gt;: &lt;span class=&quot;literal&quot;&gt;null&lt;/span&gt;
+  },
+  placeholder: {
+    type: &lt;span class=&quot;built_in&quot;&gt;String&lt;/span&gt;,
+    &lt;span class=&quot;keyword&quot;&gt;default&lt;/span&gt;: &lt;span class=&quot;string&quot;&gt;'Please Select'&lt;/span&gt;
+  },
+  intent: {
+    type: &lt;span class=&quot;string&quot;&gt;'*'&lt;/span&gt;,
+    &lt;span class=&quot;keyword&quot;&gt;default&lt;/span&gt;: &lt;span class=&quot;literal&quot;&gt;null&lt;/span&gt;
+  },
+  options: {
+    type: [&lt;span class=&quot;string&quot;&gt;'*'&lt;/span&gt;],
+    &lt;span class=&quot;keyword&quot;&gt;default&lt;/span&gt;: []
+  },
+  isOpened: {
+    type: &lt;span class=&quot;built_in&quot;&gt;Boolean&lt;/span&gt;,
+    &lt;span class=&quot;keyword&quot;&gt;default&lt;/span&gt;: &lt;span class=&quot;literal&quot;&gt;false&lt;/span&gt;
+  },
+  isFocused: {
+    type: &lt;span class=&quot;built_in&quot;&gt;Boolean&lt;/span&gt;,
+    &lt;span class=&quot;keyword&quot;&gt;default&lt;/span&gt;: &lt;span class=&quot;literal&quot;&gt;false&lt;/span&gt;
+  }
+});
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The model determines the state of the component - and only this state. The model is meant to be reactive - the component’s link and template react to model changes. We’re using &lt;a href=&quot;https://github.com/autoric/scheming&quot;&gt;Scheming&lt;/a&gt; to give us a reactive model outside of Angular’s &lt;code&gt;$scope&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Note:&lt;/strong&gt;
+This is actually a very important part of component composition - models are where state is held and we can observe these state changes outside of Angular’s &lt;code&gt;$scope&lt;/code&gt; hierarchy. Without this observable model, component decorators would not work because the decorator’s scope isn’t actually the component’s scope.&lt;/p&gt;
+&lt;h2 id=&quot;controller&quot;&gt;Controller&lt;/h2&gt;
+&lt;pre&gt;&lt;code class=&quot;lang-js&quot;&gt;&lt;span class=&quot;class&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;DropdownController&lt;/span&gt; &lt;/span&gt;{
+  constructor (uiDropdownModel) {
+    &lt;span class=&quot;keyword&quot;&gt;if&lt;/span&gt; (!&lt;span class=&quot;keyword&quot;&gt;this&lt;/span&gt;.model) {
+      &lt;span class=&quot;keyword&quot;&gt;this&lt;/span&gt;.model = &lt;span class=&quot;keyword&quot;&gt;new&lt;/span&gt; uiDropdownModel();
+    }
+  }
+
+  setOptions (options = []) {
+    &lt;span class=&quot;keyword&quot;&gt;this&lt;/span&gt;.model.options = options;
+  }
+
+  selectItem (item) {
+    &lt;span class=&quot;keyword&quot;&gt;this&lt;/span&gt;.model.display = item;
+    &lt;span class=&quot;keyword&quot;&gt;this&lt;/span&gt;.model.isOpened = &lt;span class=&quot;literal&quot;&gt;false&lt;/span&gt;;
+  }
+
+  isIntent (item) {
+    &lt;span class=&quot;keyword&quot;&gt;return&lt;/span&gt; item === &lt;span class=&quot;keyword&quot;&gt;this&lt;/span&gt;.model.intent;
+  }
+
+  setIntent (item) {
+    &lt;span class=&quot;keyword&quot;&gt;this&lt;/span&gt;.model.intent = item;
+  }
+
+  focus () {
+    &lt;span class=&quot;keyword&quot;&gt;this&lt;/span&gt;.model.isFocused = &lt;span class=&quot;literal&quot;&gt;true&lt;/span&gt;;
+    &lt;span class=&quot;keyword&quot;&gt;this&lt;/span&gt;.model.isOpened = &lt;span class=&quot;literal&quot;&gt;true&lt;/span&gt;;
+  }
+
+  blur () {
+    &lt;span class=&quot;keyword&quot;&gt;this&lt;/span&gt;.model.isFocused = &lt;span class=&quot;literal&quot;&gt;false&lt;/span&gt;;
+    &lt;span class=&quot;keyword&quot;&gt;this&lt;/span&gt;.model.isOpened = &lt;span class=&quot;literal&quot;&gt;false&lt;/span&gt;;
+  }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The controller is meant to house methods that interact with the model - the view should not directly interact with it. This separation allows the controller to be easily unit tested. The controller’s constructor has tests for a model to be predefined and will create a new on if not defined. I have done this to allow the component to be part of an owning component to pass down an instantiated model. This can be very useful for components like tabsets where something else wants to change tabs - after all, the model is just state and the view just renders that state. I haven’t found a good use-case to make dropdown models owned by a container, but to be consistent, all components have this feature. The rest of the controller will make more sense with the directive.&lt;/p&gt;
+&lt;h2 id=&quot;dropdown-component&quot;&gt;Dropdown Component&lt;/h2&gt;
+&lt;pre&gt;&lt;code class=&quot;lang-js&quot;&gt;&lt;span class=&quot;function&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;DropdownComponent&lt;/span&gt; &lt;span class=&quot;params&quot;&gt;()&lt;/span&gt; &lt;/span&gt;{
+  &lt;span class=&quot;keyword&quot;&gt;return&lt;/span&gt; {
+    restrict: &lt;span class=&quot;string&quot;&gt;'E'&lt;/span&gt;,
+
+    scope: {
+      model: &lt;span class=&quot;string&quot;&gt;'=uiDropdownModel'&lt;/span&gt;
+    },
+
+    controller: &lt;span class=&quot;string&quot;&gt;'uiDropdownController'&lt;/span&gt;,
+    controllerAs: &lt;span class=&quot;string&quot;&gt;'dropdown'&lt;/span&gt;,
+    bindToController: &lt;span class=&quot;literal&quot;&gt;true&lt;/span&gt;,
+
+    &lt;span class=&quot;built_in&quot;&gt;require&lt;/span&gt;: [&lt;span class=&quot;string&quot;&gt;'uiDropdown'&lt;/span&gt;, &lt;span class=&quot;string&quot;&gt;'?ngModel'&lt;/span&gt;],
+
+    template: &lt;span class=&quot;string&quot;&gt;`
+      &amp;lt;button
+        ui-dropdown-button
+        type=&quot;button&quot;
+        class=&quot;ui button selected&quot;
+        ng-disabled=&quot;dropdown.model.isDisabled&quot;
+        ng-class=&quot;{focus: dropdown.model.isFocused}&quot;
+      &amp;gt;
+        {{ dropdown.model.display || dropdown.model.placeholder }}
+      &amp;lt;/button&amp;gt;
+      &amp;lt;div class=&quot;options-container&quot; ng-if=&quot;dropdown.model.isOpened&quot;&amp;gt;
+        &amp;lt;ul class=&quot;options&quot; role=&quot;menu&quot;&amp;gt;
+          &amp;lt;li
+            class=&quot;option&quot;
+            role=&quot;menuitem&quot;
+            ng-repeat=&quot;item in dropdown.model.options&quot;
+            ng-mouseover=&quot;dropdown.setIntent(item)&quot;
+            ng-class=&quot;{intent: dropdown.isIntent(item)}&quot;
+            ng-click=&quot;dropdown.selectItem(item)&quot;
+          &amp;gt;
+            {{item}}
+          &amp;lt;/li&amp;gt;
+        &amp;lt;/ul&amp;gt;
+      &amp;lt;/div&amp;gt;
+    `&lt;/span&gt;,
+
+    link: {
+
+      pre: &lt;span class=&quot;function&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;params&quot;&gt;($scope, $element, $attrs, [dropdown, ngModel])&lt;/span&gt; &lt;/span&gt;{
+
+        &lt;span class=&quot;comment&quot;&gt;// ngModel - only two-way data-binding allowed&lt;/span&gt;
+        &lt;span class=&quot;keyword&quot;&gt;if&lt;/span&gt; (ngModel) {
+          ngModel.$render = &lt;span class=&quot;function&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;params&quot;&gt;()&lt;/span&gt; &lt;/span&gt;{
+            dropdown.selectItem(ngModel.$viewValue);
+          };
+
+          $scope.schemingWatch(dropdown.model, &lt;span class=&quot;string&quot;&gt;'display'&lt;/span&gt;, &lt;span class=&quot;function&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;params&quot;&gt;(value, oldValue)&lt;/span&gt; &lt;/span&gt;{
+            &lt;span class=&quot;keyword&quot;&gt;if&lt;/span&gt; (value !== oldValue) {
+              &lt;span class=&quot;comment&quot;&gt;// tell ngModel about a change only if there is one&lt;/span&gt;
+              ngModel.$setViewValue(value);
+            }
+          });
+
+          &lt;span class=&quot;comment&quot;&gt;// observed view properties&lt;/span&gt;
+          $scope.schemingWatch(dropdown.model, [&lt;span class=&quot;string&quot;&gt;'isOpened'&lt;/span&gt;, &lt;span class=&quot;string&quot;&gt;'isFocused'&lt;/span&gt;, &lt;span class=&quot;string&quot;&gt;'options'&lt;/span&gt;], &lt;span class=&quot;function&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;params&quot;&gt;()&lt;/span&gt; &lt;/span&gt;{
+            $scope.$digest();
+          });
+
+        }
+      },
+
+      post: &lt;span class=&quot;function&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;params&quot;&gt;($scope, $element, $attrs, [dropdown, ngModel])&lt;/span&gt; &lt;/span&gt;{
+        $element.on(&lt;span class=&quot;string&quot;&gt;'mousedown'&lt;/span&gt;, (event) =&amp;gt; {
+          &lt;span class=&quot;comment&quot;&gt;// prevent unintended focus changes&lt;/span&gt;
+          event.preventDefault();
+        });
+      }
+    }
+  };
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Like the tooltip component in the introduction, the link function is large here as well. The component uses a factory function that returns a Directive Definition Object. I will use this pattern until something like &lt;a href=&quot;https://github.com/angular/angular.js/issues/10007&quot;&gt;angular.component&lt;/a&gt; is released. I’ll note some choices here:&lt;/p&gt;
+&lt;h3 id=&quot;restrict&quot;&gt;Restrict&lt;/h3&gt;
+&lt;pre&gt;&lt;code class=&quot;lang-js&quot;&gt;restrict: &lt;span class=&quot;string&quot;&gt;'E'&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;All components should be element selectors - it is easier to recognize them at a glance and it is obvious who owns the isolate scope.&lt;/p&gt;
+&lt;h3 id=&quot;scope&quot;&gt;Scope&lt;/h3&gt;
+&lt;pre&gt;&lt;code class=&quot;lang-js&quot;&gt;scope: { model: &lt;span class=&quot;string&quot;&gt;'=uiDropdownModel'&lt;/span&gt; }
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;All components should have an isolate scope. While this is technically a 2-way reference binding, the reference should never be changed by either side. Items here should be intended as 1-way data bound properties (like props in &lt;a href=&quot;http://facebook.github.io/react/&quot;&gt;ReactJS&lt;/a&gt;). I tend to prefix all properties with &lt;code&gt;ui-{component_name}-&lt;/code&gt; to make an obvious association with the component. It is temping to create config properties here - I suggest avoiding the urge as it defeats the purpose of small, composable components. More on this later.&lt;/p&gt;
+&lt;h3 id=&quot;controller&quot;&gt;Controller&lt;/h3&gt;
+&lt;pre&gt;&lt;code class=&quot;lang-js&quot;&gt;controller: &lt;span class=&quot;string&quot;&gt;'uiDropdownController'&lt;/span&gt;,
+controllerAs: &lt;span class=&quot;string&quot;&gt;'dropdown'&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;All composable components should have a controller and that scope name should be a short name of the component. The controller is referenced by a string for unit testing. It is possible to grab a controller registered with a DDO, but it is silly and difficult.&lt;/p&gt;
+&lt;h3 id=&quot;bindtocontroller&quot;&gt;BindToController&lt;/h3&gt;
+&lt;pre&gt;&lt;code class=&quot;lang-js&quot;&gt;bindToController: &lt;span class=&quot;string&quot;&gt;'true'&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;This sets the scope to bind directly to the controller instead of &lt;code&gt;$scope&lt;/code&gt;. We are trying to avoid &lt;code&gt;$scope&lt;/code&gt; as much as possible - keeping as much DOM logic in the link function as possible. In this component, defining &lt;code&gt;ui-dropdown-model=&amp;quot;someDropdownModel&amp;quot;&lt;/code&gt; will actually set the &lt;code&gt;model&lt;/code&gt; property directly on the controller instance and will be defined by the time the constructor is called. Handy.&lt;/p&gt;
+&lt;h3 id=&quot;require&quot;&gt;Require&lt;/h3&gt;
+&lt;pre&gt;&lt;code class=&quot;lang-js&quot;&gt;&lt;span class=&quot;built_in&quot;&gt;require&lt;/span&gt;: [&lt;span class=&quot;string&quot;&gt;'uiDropdown'&lt;/span&gt;, &lt;span class=&quot;string&quot;&gt;'?ngModel'&lt;/span&gt;]
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The optional &lt;code&gt;ngModel&lt;/code&gt; requirement will inject the instance of the &lt;code&gt;ng-model&lt;/code&gt; controller into the linking function. This allows the dropdown component to act like other form elements with value binding, validation, etc.&lt;/p&gt;
+&lt;h3 id=&quot;template&quot;&gt;Template&lt;/h3&gt;
+&lt;p&gt;The template is inlined for &lt;a href=&quot;http://plnkr.co/FIKuIpn9xl2FRliqV05R&quot;&gt;performance&lt;/a&gt;. You can use &lt;a href=&quot;https://webpack.github.io/&quot;&gt;Webpack&lt;/a&gt; or &lt;a href=&quot;http://browserify.org/&quot;&gt;Browserify&lt;/a&gt; to do this instead:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&quot;lang-js&quot;&gt;&lt;span class=&quot;built_in&quot;&gt;require&lt;/span&gt;(&lt;span class=&quot;string&quot;&gt;'./template.html'&lt;/span&gt;);
+
+&lt;span class=&quot;comment&quot;&gt;// ...&lt;/span&gt;
+&lt;span class=&quot;keyword&quot;&gt;return&lt;/span&gt; {
+  template: template
+};
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The template contains a &lt;code&gt;ui-dropdown-button&lt;/code&gt; helper directive to attach events to effect the state of the component. Composition can be parent/child.&lt;/p&gt;
+&lt;h3 id=&quot;link&quot;&gt;Link&lt;/h3&gt;
+&lt;p&gt;The link function is broken into a &lt;code&gt;pre&lt;/code&gt; and &lt;code&gt;post&lt;/code&gt; link. It is currently considered bad practice to ever use &lt;code&gt;compile&lt;/code&gt; or &lt;code&gt;preLink&lt;/code&gt;, but &lt;code&gt;pre&lt;/code&gt; and &lt;code&gt;post&lt;/code&gt; link have an important distinction between when they get called in the lifecycle of compiling child components. &lt;code&gt;preLink&lt;/code&gt; on a parent gets called &lt;em&gt;before&lt;/em&gt; the &lt;code&gt;preLink&lt;/code&gt; of a child. &lt;code&gt;postLink&lt;/code&gt; on a parent gets called &lt;em&gt;after&lt;/em&gt; the &lt;code&gt;postLink&lt;/code&gt; of a child. You can find more information about the lifecycle of directives &lt;a href=&quot;http://www.jvandemo.com/the-nitty-gritty-of-compile-and-link-functions-inside-angularjs-directives/&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;The &lt;code&gt;preLink&lt;/code&gt; function sets up model/$scope listeners. The &lt;code&gt;preLink&lt;/code&gt; also composes components - this is a little strange that controllers don’t get this information (yet), but it is how we have to do it for now. The &lt;code&gt;preLink&lt;/code&gt; fires right after the &lt;code&gt;controller&lt;/code&gt; instantiates - which guarantees the component’s controller is in the correct state for any child components. The dropdown also sets up &lt;code&gt;ngModel&lt;/code&gt; hookups if present.&lt;/p&gt;
+&lt;p&gt;The &lt;code&gt;postLink&lt;/code&gt; sets up DOM event listeners. This has to be done in &lt;code&gt;postLink&lt;/code&gt; because in the case of transclusion, the &lt;code&gt;$element&lt;/code&gt; variable will be the final DOM in &lt;code&gt;postLink&lt;/code&gt;, but will be a cached clone in &lt;code&gt;preLink&lt;/code&gt;.&lt;/p&gt;
+&lt;h2 id=&quot;dropdown-options-decorator&quot;&gt;Dropdown Options Decorator&lt;/h2&gt;
+&lt;pre&gt;&lt;code class=&quot;lang-js&quot;&gt;&lt;span class=&quot;function&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;DropdownOptionsDecorator&lt;/span&gt; &lt;span class=&quot;params&quot;&gt;()&lt;/span&gt; &lt;/span&gt;{
+  &lt;span class=&quot;keyword&quot;&gt;return&lt;/span&gt; {
+    restrict: &lt;span class=&quot;string&quot;&gt;'A'&lt;/span&gt;,
+    &lt;span class=&quot;built_in&quot;&gt;require&lt;/span&gt;: &lt;span class=&quot;string&quot;&gt;'uiDropdown'&lt;/span&gt;,
+
+    link: {
+      pre: &lt;span class=&quot;function&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;params&quot;&gt;($scope, $element, $attrs, dropdown)&lt;/span&gt; &lt;/span&gt;{
+        $scope.$watchCollection($attrs.uiDropdownOptions, &lt;span class=&quot;function&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;params&quot;&gt;(options)&lt;/span&gt; &lt;/span&gt;{
+          &lt;span class=&quot;keyword&quot;&gt;if&lt;/span&gt; (options) {
+            dropdown.setOptions(options);
+          }
+        });
+      }
+    }
+  }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;This decorator dog-foods our API to provide a very simple case for static options passed in from a parent source (ex: page controller).&lt;/p&gt;
+&lt;p&gt;Wait, why isn’t &lt;code&gt;options&lt;/code&gt; just passed into the dropdown component through the isolate scope definition? Well, we are trying to keep the dropdown component as light and composable as possible, without making any assumptions about how an application might use the component. Having options directly passed through and attribute makes an assumption that options are static and moves the responsibility of providing options to some view controller. This may seem reasonable, but what if we don’t know the options ahead of time? What if getting options isn’t the responsibility of a parent view controller? We ran into major issues with this type of assumption on a page with many dropdowns that all requested dynamic data as the user interacted with them. And dropdowns were used on more than one page, which meant binding logic had to be copy/pasted from one page controller to the next.&lt;/p&gt;
+&lt;h2 id=&quot;dynamic-dropdown-options-decorator&quot;&gt;Dynamic Dropdown Options Decorator&lt;/h2&gt;
+&lt;p&gt;This example just uses &lt;code&gt;$timeout&lt;/code&gt; to fulfill an options request, but the idea is that a request is made to a backend and a response comes back. This type of decorator would actually be part of the application’s code since only your application knows how to talk to a backend.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&quot;lang-js&quot;&gt;&lt;span class=&quot;function&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;DropdownDynamicOptionsDecorator&lt;/span&gt; &lt;span class=&quot;params&quot;&gt;($timeout)&lt;/span&gt; &lt;/span&gt;{
+  &lt;span class=&quot;keyword&quot;&gt;return&lt;/span&gt; {
+    restrict: &lt;span class=&quot;string&quot;&gt;'A'&lt;/span&gt;,
+    &lt;span class=&quot;built_in&quot;&gt;require&lt;/span&gt;: &lt;span class=&quot;string&quot;&gt;'uiDropdown'&lt;/span&gt;,
+
+    link: {
+      pre: &lt;span class=&quot;function&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;params&quot;&gt;($scope, $element, $attrs, dropdown)&lt;/span&gt; &lt;/span&gt;{
+        $scope.schemingWatch(dropdown.model, &lt;span class=&quot;string&quot;&gt;'isOpened'&lt;/span&gt;, &lt;span class=&quot;function&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;params&quot;&gt;(isOpened)&lt;/span&gt; &lt;/span&gt;{
+          &lt;span class=&quot;keyword&quot;&gt;if&lt;/span&gt; (isOpened) {
+            $timeout(&lt;span class=&quot;function&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;params&quot;&gt;()&lt;/span&gt; &lt;/span&gt;{
+              dropdown.setOptions([&lt;span class=&quot;string&quot;&gt;'a'&lt;/span&gt;,&lt;span class=&quot;string&quot;&gt;'b'&lt;/span&gt;,&lt;span class=&quot;string&quot;&gt;'c'&lt;/span&gt;].map((o) =&amp;gt; $attrs.uiDropdownDynamicOptionsPrefix + &lt;span class=&quot;string&quot;&gt;' '&lt;/span&gt; + o));
+            }, &lt;span class=&quot;number&quot;&gt;50&lt;/span&gt;, &lt;span class=&quot;literal&quot;&gt;false&lt;/span&gt;);
+          } &lt;span class=&quot;keyword&quot;&gt;else&lt;/span&gt; {
+            dropdown.setOptions([]);
+          }
+        });
+      }
+    }
+  }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h2 id=&quot;more-composition&quot;&gt;More composition&lt;/h2&gt;
+&lt;p&gt;Here is an example component in our application:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&quot;lang-js&quot;&gt;&amp;lt;ui-dropdown
+  &lt;span class=&quot;class&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;class&lt;/span&gt;&lt;/span&gt;=&lt;span class=&quot;string&quot;&gt;&quot;small&quot;&lt;/span&gt;
+  placeholder=&lt;span class=&quot;string&quot;&gt;&quot;{{ AlarmsFilters.filters.byAlarmStatus.selected }}&quot;&lt;/span&gt;
+  ui-dropdown-keys=&lt;span class=&quot;string&quot;&gt;&quot;{ display: 'display', selected: 'selected' }&quot;&lt;/span&gt;
+  ui-dropdown-url=&lt;span class=&quot;string&quot;&gt;&quot;/html/templates/distinct-value.html&quot;&lt;/span&gt;
+  distinct-value-dropdown=&lt;span class=&quot;string&quot;&gt;&quot;alarmStatus&quot;&lt;/span&gt;
+  distinct-value-index=&lt;span class=&quot;string&quot;&gt;&quot;ALARM_INDEX_ID&quot;&lt;/span&gt;
+  distinct-value-transform=&lt;span class=&quot;string&quot;&gt;&quot;AlarmOptions.FilterByAlarmStatusOptions&quot;&lt;/span&gt;
+  lucene-query=&lt;span class=&quot;string&quot;&gt;&quot;alarmQuery&quot;&lt;/span&gt;
+  lucene-query-filter=&lt;span class=&quot;string&quot;&gt;&quot;{ field: 'alarmStatus', type: 'Number', modelKey: 'value' }&quot;&lt;/span&gt;
+  ng-model=&lt;span class=&quot;string&quot;&gt;&quot;AlarmsFilters.filters.byAlarmStatus&quot;&lt;/span&gt;
+  ng-&lt;span class=&quot;class&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;class&lt;/span&gt;&lt;/span&gt;=&lt;span class=&quot;string&quot;&gt;&quot;{applied : AlarmsFilters.filters.byAlarmStatus.value !== AlarmsFilters.defaultFilters().byAlarmStatus.value}&quot;&lt;/span&gt;
+&amp;gt;&lt;span class=&quot;xml&quot;&gt;&lt;span class=&quot;tag&quot;&gt;&amp;lt;/&lt;span class=&quot;title&quot;&gt;ui-dropdown&lt;/span&gt;&amp;gt;&lt;/span&gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;This is the dropdown component with a &lt;code&gt;distinct-value&lt;/code&gt; decorator that gets distinct &lt;code&gt;alarmStatus&lt;/code&gt; field values from the server - the guts of this decorator are very similar to the dynamic decorator shown earlier. The &lt;code&gt;lucene-query&lt;/code&gt; decorator is optionally required by the &lt;code&gt;distinct-value&lt;/code&gt; decorator to modify the query made to the server. There is actually many of these dropdowns on the page - all working together to create a filtered query for a result set. My recorded talk goes over this at &lt;a href=&quot;https://www.youtube.com/watch?v=BYVesUiUpI4&amp;amp;feature=youtu.be&amp;amp;t=1435&quot;&gt;23:55&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h2&gt;
+&lt;p&gt;Component composition is a bit difficult in Angular 1.x, but very powerful. It allows us to compose smaller pieces together to make something very useful. We have dropdowns that get options from different sources and just have different decorators to talk to backend endpoints. This allows the page controller to not have to worry about getting data to the dropdowns, but only care about the values of each dropdown. It keeps concerns at the right level.&lt;/p&gt;
+</description>
+    </item>
     <item>
       <title>Angular Component Composition - Part 1 - Introduction</title>
       <link>http://nicholasboll.github.io/blog/articles/angular-component-composition-part-1/</link>
