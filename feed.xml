@@ -17,6 +17,8 @@
       <description>&lt;h2 id=&quot;building-the-dropdown-component&quot;&gt;Building the dropdown component&lt;/h2&gt;
 &lt;p&gt;This article builds on &lt;a href=&quot;http://nicholasboll.github.io/blog/articles/angular-component-composition-part-1/&quot;&gt;Part 1 - Introduction&lt;/a&gt; of the series. Please take some time to read that article first (should only take a few minutes).&lt;/p&gt;
 &lt;p&gt;The introduction built a very simple component to showcase the idea of component composition. Now we will go in-depth starting with a dropdown component. There are many examples of dropdowns available, but this is going to be a minimalistic component that will be very easy to extend.&lt;/p&gt;
+&lt;iframe src=&quot;http://embed.plnkr.co/vsgsWlX1cYipgLW5JRYm/preview&quot; width=&quot;100%&quot; height=&quot;350px&quot;&gt;&lt;/iframe&gt;
+
 &lt;h2 id=&quot;composition&quot;&gt;Composition&lt;/h2&gt;
 &lt;p&gt;I like the Angular Bootstrap project because components there are very composable, but also very difficult to read. Here is an example from &lt;a href=&quot;https://angular-ui.github.io/bootstrap/#/dropdown&quot;&gt;UI Bootstrap&lt;/a&gt;.&lt;/p&gt;
 &lt;pre&gt;&lt;code class=&quot;lang-html&quot;&gt;&lt;span class=&quot;tag&quot;&gt;&amp;lt;&lt;span class=&quot;title&quot;&gt;div&lt;/span&gt; &lt;span class=&quot;attribute&quot;&gt;class&lt;/span&gt;=&lt;span class=&quot;value&quot;&gt;&quot;btn-group&quot;&lt;/span&gt; &lt;span class=&quot;attribute&quot;&gt;dropdown&lt;/span&gt; &lt;span class=&quot;attribute&quot;&gt;is-open&lt;/span&gt;=&lt;span class=&quot;value&quot;&gt;&quot;status.isopen&quot;&lt;/span&gt;&amp;gt;&lt;/span&gt;
